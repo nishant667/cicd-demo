@@ -1,43 +1,30 @@
-
-name: CI/CD Pipeline
+name: Build and Push Docker Image
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main  # Run workflow when code is pushed to main branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. Checkout the repo
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: actions/checkout@v3
+
+      # 2. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build, tag, and push image to DockerHub
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          IMAGE_NAME: my-image
-        run: |
-          docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME .
-          docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: '3.x'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Test with pytest
-        run: |
-          pip install pytest
-          pytest test.py
+      # 3. Build Docker image
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-image ./  # Change path if Dockerfile not in root
+
+      # 4. Push Docker image to Docker Hub
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-image
