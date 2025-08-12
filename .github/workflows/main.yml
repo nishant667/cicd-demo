@@ -17,12 +17,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push image to DockerHub
+      - name: Build and push Docker image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
         run: |
           echo "Building Docker image..."
-          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/my-image:latest .
+          docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:latest .
           echo "Pushing Docker image..."
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-image:latest
+          docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
 
   test:
     runs-on: ubuntu-latest
